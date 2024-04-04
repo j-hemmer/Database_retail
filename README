@@ -1,0 +1,30 @@
+These files compose the database creation, related functions for interacting with the database.
+Here's the general structure of the data:
+- there are stores, each with their own attributes
+- the full Stores table is located in the central_db, as well as each of the two shards
+- Vendors contains the information about each of the items in the store_id (note that the shards are split based off of store_id)
+    - This table will be queried by store managers
+- Customer_Portal contains the information about items in the stores relevant to customers
+    - This table will be queried by users
+
+Setting up the code:
+- first need to set up MySQL & MySQL Workbench locally (I'd recommend to follow a YouTube video)
+    - this is the video I used: https://youtu.be/u96rVINbAUI?si=D_yqLWbq3_UeGTHL
+- Check that your Firewall isn't blocking MySQL
+- Add MySQL to your PATH
+- run central_creation.py, shard_creation.py
+
+Brief file descriptions:
+- tables_creation.txt --> details table schemas from script to create tables
+- central_creation.py --> creates the database "central_db" that contains the stores and their information
+- shard_creation.py --> creates the shard databases (currently only have two). creates Vendor, Customer_Portal, and Stores in each shard
+- config.py --> stores connection information
+- admin_actions --> this file contains the planned functions that admins (store operators) will use to interact with the data
+- customer_actions --> this file contains the planned functions that customers will use to interact with the data
+
+Planned implementation:
+- mainly need to create GUI over the functions
+- may want to create a users table to distinguish between admin & customer usages
+    - i.e redirect to different pages based off credentials entered in a login page
+- perhaps will want to structure the databases differently
+    - I'm not sure whether Vendor and Customer_Portal really need to be separate tables, for instance

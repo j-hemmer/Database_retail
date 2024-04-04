@@ -1,0 +1,27 @@
+CREATE TABLE Stores(
+	store_code VARCHAR(50) PRIMARY KEY,
+	address TEXT,
+	opening_time TIME,
+	closing_time TIME
+);
+
+CREATE TABLE Vendor(
+	item_code VARCHAR(50),
+	store_code VARCHAR(50),
+	item_name VARCHAR(50),
+	quantity INT,
+	price DECIMAL(6, 2),
+	PRIMARY KEY(item_code, store_code),
+	FOREIGN KEY(store_code) REFERENCES Stores(store_code)
+);
+
+CREATE TABLE Customer_Portal(
+	item_code VARCHAR(50),
+	store_code VARCHAR(50),
+	item_name VARCHAR(50),
+	price DECIMAL(6, 2),
+	in_stock BOOLEAN,
+	PRIMARY KEY(item_code, store_code),
+	FOREIGN KEY(store_code) REFERENCES Stores(store_code),
+	FOREIGN KEY(item_code) REFERENCES Vendor(item_code)
+);
