@@ -125,6 +125,7 @@ def update_store_hours():
         messagebox.showinfo("Store hours updated successfully")
         cursor.close()
         mydb.close()
+        reset_gui()
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error updating store hours in MySQL database: {err}")
 
