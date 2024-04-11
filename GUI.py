@@ -116,12 +116,12 @@ def update_store_hours():
         connect_to_database(shard_id)
         cursor = mydb.cursor()
         store_id = store_id_entry.get()
-        opening_hours = str(opening_hours_entry.get())
-        closing_hours = str(closing_hours_entry.get())
+        opening_hours = opening_hours_entry.get()
+        closing_hours = closing_hours_entry.get()
         sql = "UPDATE Stores SET opening_time = %s, closing_time = %s WHERE store_code = %s"
         val = (f'{opening_hours}', f'{closing_hours}', f'{store_id}')
         cursor.execute(sql, val)
-        mydb.commit()
+        mydb.commit()        
         messagebox.showinfo("Store hours updated successfully")
         cursor.close()
         mydb.close()
@@ -198,6 +198,48 @@ def confirm_fetch():
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error fetching data from MySQL database: {err}")
 
+def delete_store():
+    #When user clicks delete store, it comes up with the store id entry boxes
+    #When they click the delete store button, it connects to the appropriate database based on the defined shard function
+
+    global store_code_entry, address_entry, opening_time_entry, closing_time_entry
+
+    # Hide the insert button
+    delete_button.pack_forget()
+
+    # Entry fields for store information
+    tk.Label(root, text="Store Code:").pack()
+    store_code_entry = tk.Entry(root)
+    store_code_entry.pack()
+    
+    # Delete store information button
+    delete_store_button = tk.Button(root, text="Delete Store Information", command=perform_store_deletion)
+    delete_store_button.pack(pady=10)
+
+def perform_store_deletion():
+    # After entering the values, inserts the information for the store code
+
+    try:
+        store_code = store_code_entry.get()
+        # Get the shard based on the store_code
+        shard = get_shard(store_code)
+        connect_to_database(shard)
+        cursor = mydb.cursor()
+        sql = "DELETE FROM Stores WHERE store_code = %s"
+        val = (store_code,)
+        cursor.execute(sql, val)
+        mydb.commit()
+
+        messagebox.showinfo("Success", "Store deleted successfully!")
+        cursor.close()
+        mydb.close()
+        reset_gui()
+    except mysql.connector.Error as err:
+        messagebox.showerror("Error", f"Error deleting store information into MySQL database: {err}")
+
+
+
+
 def reset_gui():
     for widget in root.winfo_children():
         widget.destroy()
@@ -223,6 +265,10 @@ def reset():
     # Get data from one of the stores
     fetch_button = tk.Button(root, text="Get data from a store", command=fetch_data)
     fetch_button.pack(pady=10)
+    
+    # Delete store information button
+    delete_button = tk.Button(root, text="Delete Store Information", command=delete_store)
+    delete_button.pack(pady=10)
 
     #Exits
     exit_button = tk.Button(root, text="Exit", command=root.quit)
@@ -251,6 +297,9 @@ insert_button.pack(pady=10)
 # Get data from one of the stores
 fetch_button = tk.Button(root, text="Get data from a store", command=fetch_data)
 fetch_button.pack(pady=10)
+
+delete_button = tk.Button(root, text="Delete Store Information", command=delete_store)
+delete_button.pack(pady=10)
 
 #Exits
 exit_button = tk.Button(root, text="Exit", command=root.quit)
