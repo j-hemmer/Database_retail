@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert Store Information</title>
+</head>
+<body>
+    <h1>Insert Store Information</h1>
+    <form action="/insert_store" method="post">
+        <label for="store_code">Store Code:</label><br>
+        <input type="text" id="store_code" name="store_code" required><br><br>
+        
+        <label for="address">Address:</label><br>
+        <input type="text" id="address" name="address" required><br><br>
+
+        <label for="opening_time">Opening Time (HH:MM:SS):</label><br>
+        <input type="text" id="opening_time" name="opening_time" required><br><br>
+
+        <label for="closing_time">Closing Time (HH:MM:SS):</label><br>
+        <input type="text" id="closing_time" name="closing_time" required><br><br>
+
+        <input type="submit" value="Insert Store Information">
+    </form>
+</body>
+</html>

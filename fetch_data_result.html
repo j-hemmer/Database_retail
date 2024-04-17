@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Data Result</title>
+</head>
+<body>
+    <h1>Fetch Data Result</h1>
+    <div>
+        {% if data_text %}
+            <p>{{ data_text }}</p>
+        {% else %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </div>
+    <a href="/">Home</a>
+</body>
+</html>
