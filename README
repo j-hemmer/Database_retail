@@ -21,10 +21,10 @@ Brief file descriptions:
 - config.py --> stores connection information
 - admin_actions --> this file contains the planned functions that admins (store operators) will use to interact with the data
 - customer_actions --> this file contains the planned functions that customers will use to interact with the data
+- admin_interface --> this file provides the gui through tkinter for the admin to interact with the database
+- customer_interface --> this file provides the interface through Flask for customers to interact with the database
+- main.py --> used to launch the interfaces
 
 Planned implementation:
-- mainly need to create GUI over the functions
-- may want to create a users table to distinguish between admin & customer usages
-    - i.e redirect to different pages based off credentials entered in a login page
-- perhaps will want to structure the databases differently
-    - I'm not sure whether Vendor and Customer_Portal really need to be separate tables, for instance
+- get customer interface to load from main
+- tweak customer interface to be more sophisticated
