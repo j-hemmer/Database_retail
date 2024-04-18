@@ -30,7 +30,7 @@ def search_items(item_name, store_code, in_stock, price_min=None, price_max=None
     shard_connection_params = shard_connections[shard_id]
 
     # Construct the WHERE clause based on the provided parameters
-    where_clause = "WHERE item_name = %s AND store_code = %s AND in_stock = %s"
+    where_clause = "WHERE Customer_Portal.item_name = %s AND Customer_Portal.store_code = %s AND Customer_Portal.in_stock = %s"
     where_params = [item_name, store_code, in_stock]
 
     if price_min is not None:
@@ -51,7 +51,7 @@ def search_items(item_name, store_code, in_stock, price_min=None, price_max=None
 
     # Construct the SQL query
     sql_query = f"""
-        SELECT Stores.store_address, item_name, price, in_stock
+        SELECT Stores.address, item_name, price, in_stock
         FROM Customer_Portal
         JOIN Stores ON Stores.store_code = Customer_Portal.store_code
         {where_clause}
