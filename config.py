@@ -7,7 +7,7 @@ central_db_params = {
 }
 
 shard_connections = {
-    1: {"host": "localhost", "user": "root", "password": "dsci551", "database": "shard1_db"},
-    2: {"host": "localhost", "user": "root", "password": "dsci551", "database": "shard2_db"},
+    0: {"host": "localhost", "user": "root", "password": "dsci551", "database": "shard1_db"},
+    1: {"host": "localhost", "user": "root", "password": "dsci551", "database": "shard2_db"},
     # Add configurations for other shards as needed
 }

@@ -100,6 +100,45 @@ def insert_store(store_code, address, opening_time, closing_time):
                 central_cursor.close()
                 central_connection.close()
 
+def get_stores(return_all_columns=False):
+    try:
+        connection = mysql.connector.connect(**central_db_params)
+        cursor = connection.cursor()
+
+        # Determine the columns to select based on the function argument
+        if return_all_columns:
+            # Select all columns
+            columns = "*"
+        else:
+            # Select store code and address columns
+            columns = "store_code, address"
+
+        # Execute the query to select all stores or just the address
+        query = f"SELECT {columns} FROM stores"
+        cursor.execute(query)
+
+        # Fetch all rows
+        store_records = cursor.fetchall()
+
+        if return_all_columns:
+            return store_records  # Return all columns
+        else:
+            # Return store code and address pairs
+            return store_records
+
+    except mysql.connector.Error as err:
+        # Handle any database errors
+        print(f"Error fetching store information: {err}")
+        return []
+
+    finally:
+        # Close cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
 # Function to update existing store's hours
 def update_hours(store_code, opening_time, closing_time):
     shard_id = get_shard(store_code)
@@ -141,6 +180,47 @@ def update_hours(store_code, opening_time, closing_time):
             if central_connection:
                 central_cursor.close()
                 central_connection.close()
+
+def delete_store(store_code):
+    shard_id = get_shard(store_code)
+    shard_connection_params = shard_connections[shard_id]
+    central_connection_params = central_db_params
+
+    shard_connection = connect_to_database(shard_connection_params)
+    central_connection = connect_to_database(central_connection_params)
+
+    if shard_connection and central_connection:
+        try:
+            # Update in shard database
+            shard_cursor = shard_connection.cursor()
+            delete_store_query = """
+            DELETE
+            FROM Stores
+            WHERE store_code = %s
+            """
+            shard_cursor.execute(delete_store_query, (store_code,))
+            shard_connection.commit()
+
+            # Update in central database
+            central_cursor = central_connection.cursor()
+            delete_central_query = """
+            DELETE
+            FROM Stores
+            WHERE store_code = %s
+            """
+            central_cursor.execute(delete_central_query, (store_code,))
+            central_connection.commit()
+
+            print("Store deleted successfully.")
+        except mysql.connector.Error as err:
+            print(f"Error deleting store: {err}")
+        finally:
+            if shard_connection:
+                shard_cursor.close()
+                shard_connection.close()
+            if central_connection:
+                central_connection.close()
+
 
 def stock_new_item(item_code, store_code, item_name, quantity, price):
     shard_id = get_shard(store_code)
@@ -254,21 +334,21 @@ def remove_item(item_code, store_code):
 
     if shard_connection:
         try:
-            # Delete item from Vendor table
+            # Delete item from Customer_Portal table first
             shard_cursor = shard_connection.cursor()
-            delete_vendor_query = """
-                            DELETE FROM Vendor
-                            WHERE item_code = %s AND store_code = %s
-                            """
-            shard_cursor.execute(delete_vendor_query, (item_code, store_code))
-            shard_connection.commit()
-
-            # Delete item from Customer_Portal table
             delete_customer_portal_query = """
                             DELETE FROM Customer_Portal
                             WHERE item_code = %s AND store_code = %s
                             """
             shard_cursor.execute(delete_customer_portal_query, (item_code, store_code))
+            shard_connection.commit()
+
+            # Delete item from Vendor table after Customer_Portal deletion
+            delete_vendor_query = """
+                            DELETE FROM Vendor
+                            WHERE item_code = %s AND store_code = %s
+                            """
+            shard_cursor.execute(delete_vendor_query, (item_code, store_code))
             shard_connection.commit()
 
             print(f"{item_code} has been removed from store {store_code}")
@@ -279,34 +359,42 @@ def remove_item(item_code, store_code):
                 shard_cursor.close()
                 shard_connection.close()
 
-def filter_items(store_codes, item_codes, item_names, out_of_stock):
-    for store_code in store_codes:
-        shard_id = get_shard(store_code)
-        shard_connections_params = shard_connections[shard_id]
+def view_items(store_code, item_code, item_name):
+    shard_id = get_shard(store_code)
+    shard_connections_params = shard_connections[shard_id]
 
-        shard_connection = connect_to_database(shard_connections_params)
+    shard_connection = connect_to_database(shard_connections_params)
 
-        if shard_connection:
-            try:
-                # delete item from a store
-                shard_cursor = shard_connection.cursor()
-                if out_of_stock:
-                    filter_items_query = """
-                                    SELECT * FROM Vendor
-                                    WHERE store_code = %s AND (item_code IN %s OR item_name IN %s) AND quantity = 0
+    if shard_connection:
+        try:
+            shard_cursor = shard_connection.cursor()
+
+            if not any([item_code, item_name]):
+                # If none of the fields are entered, return all items from the specified store_code
+                filter_items_query = """
+                                    SELECT item_code, item_name, quantity, price FROM Vendor
+                                    WHERE store_code = %s
                                     """
-                else:
-                    filter_items_query = """
-                                        SELECT * FROM Vendor
-                                        WHERE store_code = %s AND (item_code IN %s OR item_name IN %s)
-                                        """
-                shard_cursor.execute(filter_items_query, (store_code, item_codes, item_names))
-                shard_connection.commit()
+                shard_cursor.execute(filter_items_query, (store_code,))
+            else:
+                filter_items_query = """
+                                    SELECT item_code, item_name, quantity, price FROM Vendor
+                                    WHERE store_code = %s AND (item_code = %s OR item_name = %s)
+                                    """
+                shard_cursor.execute(filter_items_query, (store_code, item_code, item_name))
 
-                print(f"Filtering")
-            except mysql.connector.Error as err:
-                print(f"Error filtering")
+            items = shard_cursor.fetchall()
+            shard_connection.commit()
 
-            finally:
-                if shard_connection:
-                    shard_cursor.close()
+            print(f"Filtering")
+            return items
+        except mysql.connector.Error as err:
+            print(f"Error filtering: {err}")
+            return []
+        finally:
+            if shard_connection:
+                shard_cursor.close()
+
+
+
+
