@@ -12,6 +12,18 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/delete_store', methods=['GET', 'POST'])
+def delete_store():
+    if request.method == 'POST':
+        # Get form data
+        store_code = request.form['store_code']
+        
+        # Delete store information from the database
+        delete_store_info(store_code)
+        
+        return render_template('index.html')
+    else:
+        return render_template('delete_store_page.html')
 
 @app.route('/insert_store', methods=['GET', 'POST'])
 def insert_store():
@@ -39,10 +51,14 @@ def update_hours():
         closing_hours = request.form['closing_hours']
         
         # Update store hours in the database
-        update_store_hours(store_id, opening_hours, closing_hours)
+        success = update_store_hours(store_id, opening_hours, closing_hours)
         
-        # Redirect to index page or any other page as needed
-        return render_template('index.html')
+        if success:
+            # Redirect to index page or any other page as needed
+            return render_template('index.html')
+        else:
+            # Display error message if the store code doesn't exist
+            return render_template('error.html', message='Store code does not exist')
     else:
         return render_template('update_hours.html')
 
@@ -79,6 +95,9 @@ def get_shard(store_code):
     # just going to use 2
     # num_shards = len(shard_connections)
     return (int(store_code) % 2)+ 1
+
+def home():
+    return render_template('index.html')
 
 def insert_store():
     if request.method == 'POST':
@@ -128,9 +147,16 @@ def update_store_hours(store_id, opening_hours, closing_hours):
     sql = "UPDATE Stores SET opening_time = %s, closing_time = %s WHERE store_code = %s"
     val = (opening_hours, closing_hours, store_id) 
     cursor.execute(sql, val)
-    mydb.commit()
-    cursor.close()
-    mydb.close()
+    if cursor.rowcount == 0:
+        # If no rows were affected, it means the store code doesn't exist
+        cursor.close()
+        mydb.close()
+        return False
+    else:
+        mydb.commit()
+        cursor.close()
+        mydb.close()
+        return True
 
 def fetch_store_data(store_id):
     # Getting the store data from a certain store ID
@@ -145,6 +171,31 @@ def fetch_store_data(store_id):
     cursor.close()
     mydb.close()
     return result
+
+
+def delete_store_info(store_code):
+    try:
+        # Get shard based on store code
+        shard = get_shard(store_code)
+
+        # Connect to the database depending on our shard and create cursor
+        mydb = connect_to_database(shard)
+        cursor = mydb.cursor()
+
+        # Delete the row from the database
+        sql = "DELETE FROM Stores WHERE store_code = %s"
+        val = (store_code,)
+        cursor.execute(sql, val)
+
+        # Commit and close everything
+        mydb.commit()
+        cursor.close()
+
+        return True, "Store information deleted successfully!"
+    except mysql.connector.Error as err:
+        return False, f"Error deleting store information from MySQL database: {err}"
+
+
 
 # Define other routes similarly
 if __name__ == '__main__':
