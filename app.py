@@ -1,4 +1,7 @@
 from flask import Flask, render_template, request, jsonify
+import geopandas as gpd
+import folium
+from folium import plugins
 import mysql.connector
 
 db_config = {
@@ -11,6 +14,57 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/map')
+def show_map():
+    # REPLACE WITH YOUR PATH TO THE .SHP FILE
+    # Also make sure all of the supporting files are present as well
+    gdf = gpd.read_file('/Users/john/Spring2024/DSCI551/Retail_Database/shapefile_of_us/cb_2018_us_nation_5m.shp')
+
+    # Create a map using Folium
+    map = folium.Map(location=[gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean()], zoom_start=5)
+
+    # Add GeoPandas GeoDataFrame to the map and setup database connections
+    folium.GeoJson(gdf).add_to(map)
+    connection = connect_to_database(1)
+    connection2 = connect_to_database(2)
+
+    # Get points from both of the databases
+    points = get_points_from_database(connection)
+    points2 = get_points_from_database(connection2)
+
+    # Add points to the map as markers
+    for point in points:
+        # Point: [y coordinate, x coordinate, address]
+        # Create popup string
+        popup_string = "Address:\t"
+        popup_string += str(point[2])
+        popup_string += "\nOpening Hours:\t"
+        popup_string += str(point[3])
+        popup_string += "\nClosing Hours:\t"
+        popup_string += str(point[4])
+        folium.Marker(location=[point[1], point[0]],popup=popup_string, icon=folium.Icon(color='green')).add_to(map)
+    
+    for point in points2:
+        folium.Marker(location=[point[1], point[0]], icon = folium.Icon(color='red')).add_to(map)
+    
+    legend_html = '''
+         <div style="position: fixed; 
+                     bottom: 50px; left: 50px; width: 150px; height: 90px; 
+                     border:2px solid grey; z-index:9999; font-size:14px;
+                     ">&nbsp; Legend <br>
+                       &nbsp; Stores from shard 1 &nbsp; <i class="fa fa-map-marker fa-2x" style="color:green"></i><br>
+                       &nbsp; Stores from shard 2 &nbsp; <i class="fa fa-map-marker fa-2x" style="color:red"></i>
+          </div>
+         '''
+    map.get_root().html.add_child(folium.Element(legend_html))
+    
+    # Save the map to an HTML file
+    map.save('templates/map.html')
+
+    connection.close()
+    # Render the map HTML template
+    return render_template('map.html')
 
 @app.route('/delete_store', methods=['GET', 'POST'])
 def delete_store():
@@ -33,9 +87,10 @@ def insert_store():
         address = request.form['address']
         opening_time = request.form['opening_time']
         closing_time = request.form['closing_time']
-        
+        x_coord = request.form['x']
+        y_coord = request.form['y']
         # Insert store information into the database
-        insert_store_info(store_code, address, opening_time, closing_time)
+        insert_store_info(store_code, address, opening_time, closing_time, x_coord, y_coord)
         
 
         return render_template('index.html')
@@ -81,7 +136,7 @@ def fetch_data():
                 data_text += str(data) + " "
             return render_template('fetch_data_result.html', data_text=data_text)
         else:
-            return jsonify({"success": False, "message": f"No data found for Store ID: {store_id}"})
+            return render_template('fetch_data_result.html', data_text=f"Nothing found for store ID: {store_id}")
     else:
         return render_template('fetch_data.html')
 
@@ -105,6 +160,14 @@ def insert_store():
         pass
     else:
         return render_template('insert_store.html')
+    
+def get_points_from_database(connection):
+    # Query the database to get x and y coordinates of the points from out stores
+    cursor = connection.cursor()
+    cursor.execute("SELECT x, y, address, opening_time, closing_time FROM Stores")
+    points = cursor.fetchall()
+    cursor.close()
+    return points
 
 def connect_to_database(shard):
     try:
@@ -120,17 +183,24 @@ def connect_to_database(shard):
         # Handle connection error
         raise Exception(f"Error connecting to MySQL database: {err}")
 
-def insert_store_info(store_code, address, opening_time, closing_time):
+def insert_store_info(store_code, address, opening_time, closing_time, x, y):
     # Get shard based on store code
-    shard = get_shard(store_code)  
+    shard = get_shard(store_code)
 
     # Connect to the database depending on our shard and create cursor
     mydb = connect_to_database(shard)
     cursor = mydb.cursor()
 
     # Insert the values into the database
-    sql = "INSERT INTO Stores (store_code, address, opening_time, closing_time) VALUES (%s, %s, %s, %s)"
-    val = (store_code, address, opening_time, closing_time)
+    if float(y) < 25 or float(y) > 85:
+        x = None
+        y = None
+    if float(x) < -120 or float(x) > -70:
+        y = None
+        x = None
+
+    sql = "INSERT INTO Stores (store_code, address, opening_time, closing_time, x, y) VALUES (%s, %s, %s, %s, %s, %s)"
+    val = (store_code, address, opening_time, closing_time, x, y)
     cursor.execute(sql, val)
     
     # Commit and close everything
