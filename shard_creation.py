@@ -56,9 +56,12 @@ def create_databases_and_tables():
                         store_code VARCHAR(50) PRIMARY KEY,
                         address TEXT,
                         opening_time TIME,
-                        closing_time TIME
+                        closing_time TIME,
+                        x FLOAT,
+                        y FLOAT
                     )
                     """,
+
                     """
                     CREATE TABLE IF NOT EXISTS Vendor (
                         item_code VARCHAR(50),
