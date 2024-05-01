@@ -3,6 +3,7 @@ import mysql.connector
 from config import central_db_params
 
 def create_central_database():
+    connection = None  # Initialize connection variable
     try:
         connection = mysql.connector.connect(**central_db_params)
         cursor = connection.cursor()
@@ -21,18 +22,20 @@ def create_central_database():
             connection.close()
 
 def create_stores_table():
+    connection = None
     try:
         connection = mysql.connector.connect(**central_db_params)
         cursor = connection.cursor()
-
         create_stores_table_query = """
-        CREATE TABLE IF NOT EXISTS Stores (
-            store_code VARCHAR(50) PRIMARY KEY,
-            address TEXT,
-            opening_time TIME,
-            closing_time TIME
-        )
-        """
+                CREATE TABLE IF NOT EXISTS Stores (
+                    store_code VARCHAR(50) PRIMARY KEY,
+                    address TEXT,
+                    opening_time TIME,
+                    closing_time TIME,
+                    x FLOAT,
+                    y FLOAT
+                )
+                """
 
         cursor.execute(create_stores_table_query)
         connection.commit()
