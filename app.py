@@ -3,6 +3,8 @@ import geopandas as gpd
 import folium
 from folium import plugins
 import mysql.connector
+from folium.plugins import HeatMap
+from shapely.geometry import Point
 
 db_config = {
     'host': 'localhost',
@@ -35,23 +37,39 @@ def show_map():
     points = get_points_from_database(connection)
     points2 = get_points_from_database(connection2)
 
-    all_points = []
+    all_points = points + points2
+    gdf_points = gpd.GeoDataFrame(geometry=[Point(p[0], p[1]) for p in all_points], crs="EPSG:4326")
+    # https://www.flexprojector.com/
+    # Used flexprojector to get an appropriate coordinate system
+    # Using Albers equal conic area
+    # gdf_points = gdf_points.to_crs(9822)
+    gdf_points['geometry'] = gdf_points['geometry'].buffer(0.05)
+    gdf_points_json = gdf_points.to_json()
+    folium.GeoJson(gdf_points_json).add_to(map)
+
 
     # Add points to the map as markers
     for point in points:
-        # Point: [y coordinate, x coordinate, address, opening hours, closing hours]
+        # Point: [y coordinate, x coordinate, address, opening hours, closing hours, store code]
         # This is the order used in the sql expression used to retrieve the data
         # Create popup string
-        popup_string = "Address:\t"
+        popup_string = "Store code:\t"
+        popup_string += str(point[5])
+        popup_string += "\nAddress:\t"
         popup_string += str(point[2])
         popup_string += "\nOpening Hours:\t"
         popup_string += str(point[3])
         popup_string += "\nClosing Hours:\t"
         popup_string += str(point[4])
         folium.Marker(location=[point[1], point[0]],popup=popup_string, icon=folium.Icon(color='green')).add_to(map)
+        # Create a buffer of radius 1000 around the icon
+        # Not including because radius is in pixels
+        # folium.CircleMarker([point[1], point[0]], radius=1000, color='green', fill=True, fill_color='green', fill_opacity=0.2).add_to(map)
     
     for point in points2:
-        popup_string = "Address:\t"
+        popup_string = "Store code:\t"
+        popup_string += str(point[5])
+        popup_string += "\nAddress:\t"
         popup_string += str(point[2])
         popup_string += "\nOpening Hours:\t"
         popup_string += str(point[3])
@@ -61,14 +79,16 @@ def show_map():
     
     legend_html = '''
          <div style="position: fixed; 
-                     bottom: 50px; left: 50px; width: 150px; height: 140px; 
+                     bottom: 50px; left: 50px; width: 150px; height: 170px; 
                      border:2px solid grey; z-index:9999; font-size:14px;
                      ">&nbsp; Legend <br>
                        &nbsp; Stores from shard 1: &nbsp; <i class="fa fa-map-marker fa-2x" style="color:green"></i><br>
-                       &nbsp; Stores from shard 2: &nbsp; <i class="fa fa-map-marker fa-2x" style="color:red"></i>
+                       &nbsp; Stores from shard 2: &nbsp; <i class="fa fa-map-marker fa-2x" style="color:red"></i><br>
+                       &nbsp; Buffer: &nbsp; <svg height="20" width="20"><circle cx="10" cy="10" r="10" fill="rgb(0, 144, 255)" /></svg>
           </div>
          '''
     map.get_root().html.add_child(folium.Element(legend_html))
+    
     
     # Save the map to an HTML file
     map.save('templates/map.html')
@@ -175,7 +195,7 @@ def insert_store():
 def get_points_from_database(connection):
     # Query the database to get x and y coordinates of the points from out stores
     cursor = connection.cursor()
-    cursor.execute("SELECT x, y, address, opening_time, closing_time FROM Stores")
+    cursor.execute("SELECT x, y, address, opening_time, closing_time, store_code FROM Stores")
     points = cursor.fetchall()
     cursor.close()
     return points
