@@ -13,8 +13,14 @@ Setting up the code:
 - Check that your Firewall isn't blocking MySQL
 - Add MySQL to your PATH
 - run central_creation.py, shard_creation.py
+- To run app.py, you must specify the shapefile path or comment it out. Additionally, geopandas must be installed as well as folium and shapely.
+- Geopandas can be installed as seen on video, by using anaconda navigator if pip install is not working
+- The template folder houses the .html files for the app.py
+- There is also a folder with the shapfile that can be added to the show_map function in app.py
 
 Brief file descriptions:
+- app.py --> web based GUI to create, delete, update stores as well as view them in a map
+- GUI.py --> same thing as app.py except is not web based and has less functionality
 - tables_creation.txt --> details table schemas from script to create tables
 - central_creation.py --> creates the database "central_db" that contains the stores and their information
 - shard_creation.py --> creates the shard databases (currently only have two). creates Vendor, Customer_Portal, and Stores in each shard
