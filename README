@@ -20,6 +20,8 @@ Setting up the code:
 
 Brief file descriptions:
 - app.py --> web based GUI to create, delete, update stores as well as view them in a map
+- templates --> houses all of the html files. This includes for app.py as well as customer_interface.py
+- template --> houses the html files for only app.py, but just use templates because that is the name used for app.py code
 - GUI.py --> same thing as app.py except is not web based and has less functionality
 - tables_creation.txt --> details table schemas from script to create tables
 - central_creation.py --> creates the database "central_db" that contains the stores and their information
@@ -30,7 +32,3 @@ Brief file descriptions:
 - admin_interface --> this file provides the gui through tkinter for the admin to interact with the database
 - customer_interface --> this file provides the interface through Flask for customers to interact with the database
 - main.py --> used to launch the interfaces
-
-Planned implementation:
-- get customer interface to load from main
-- tweak customer interface to be more sophisticated
