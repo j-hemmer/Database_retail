@@ -19,10 +19,12 @@ def index():
 def show_map():
     # REPLACE WITH YOUR PATH TO THE .SHP FILE
     # Also make sure all of the supporting files are present as well
-    gdf = gpd.read_file('/Users/john/Spring2024/DSCI551/Retail_Database/shapefile_of_us/cb_2018_us_nation_5m.shp')
+    gdf = gpd.read_file('/Users/john/Spring2024/DSCI551/Retail_Database/states/cb_2018_us_state_500k.shp')
 
     # Create a map using Folium
-    map = folium.Map(location=[gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean()], zoom_start=5)
+    # gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean()
+    # Chose center of the contiguous US as the starting center
+    map = folium.Map(location=[39.8283, -98.5795], zoom_start=5)
 
     # Add GeoPandas GeoDataFrame to the map and setup database connections
     folium.GeoJson(gdf).add_to(map)
@@ -33,9 +35,12 @@ def show_map():
     points = get_points_from_database(connection)
     points2 = get_points_from_database(connection2)
 
+    all_points = []
+
     # Add points to the map as markers
     for point in points:
-        # Point: [y coordinate, x coordinate, address]
+        # Point: [y coordinate, x coordinate, address, opening hours, closing hours]
+        # This is the order used in the sql expression used to retrieve the data
         # Create popup string
         popup_string = "Address:\t"
         popup_string += str(point[2])
@@ -46,15 +51,21 @@ def show_map():
         folium.Marker(location=[point[1], point[0]],popup=popup_string, icon=folium.Icon(color='green')).add_to(map)
     
     for point in points2:
-        folium.Marker(location=[point[1], point[0]], icon = folium.Icon(color='red')).add_to(map)
+        popup_string = "Address:\t"
+        popup_string += str(point[2])
+        popup_string += "\nOpening Hours:\t"
+        popup_string += str(point[3])
+        popup_string += "\nClosing Hours:\t"
+        popup_string += str(point[4])
+        folium.Marker(location=[point[1], point[0]],popup=popup_string, icon = folium.Icon(color='red')).add_to(map)
     
     legend_html = '''
          <div style="position: fixed; 
-                     bottom: 50px; left: 50px; width: 150px; height: 90px; 
+                     bottom: 50px; left: 50px; width: 150px; height: 140px; 
                      border:2px solid grey; z-index:9999; font-size:14px;
                      ">&nbsp; Legend <br>
-                       &nbsp; Stores from shard 1 &nbsp; <i class="fa fa-map-marker fa-2x" style="color:green"></i><br>
-                       &nbsp; Stores from shard 2 &nbsp; <i class="fa fa-map-marker fa-2x" style="color:red"></i>
+                       &nbsp; Stores from shard 1: &nbsp; <i class="fa fa-map-marker fa-2x" style="color:green"></i><br>
+                       &nbsp; Stores from shard 2: &nbsp; <i class="fa fa-map-marker fa-2x" style="color:red"></i>
           </div>
          '''
     map.get_root().html.add_child(folium.Element(legend_html))
@@ -109,7 +120,7 @@ def update_hours():
         success = update_store_hours(store_id, opening_hours, closing_hours)
         
         if success:
-            # Redirect to index page or any other page as needed
+            # Redirect to index page
             return render_template('index.html')
         else:
             # Display error message if the store code doesn't exist
