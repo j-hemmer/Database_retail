@@ -123,7 +123,24 @@ def insert_store():
         return render_template('index.html')
     else:
         return render_template('insert_store.html')
-    
+
+@app.route('/insert_inventory', methods=['GET', 'POST'])
+def insert_inventory():
+    if request.method == 'POST':
+        # Get form data
+        store_code = request.form['store_code']
+        item_name = request.form['item_name']
+        item_code = request.form['item_code']
+        quantity = request.form['quantity']
+        price = request.form['price']
+        # Insert store information into the database
+        #insert_new_store(store_code, address, opening_time, closing_time, x_coord, y_coord)
+        
+
+        return render_template('index.html')
+    else:
+        return render_template('insert_inventory.html')
+
 @app.route('/update_hours', methods=['GET', 'POST'])
 def update_hours():
     if request.method == 'POST':
