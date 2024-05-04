@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Store</title>
+    <title>User Interface</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,7 +29,8 @@
             font-weight: bold;
             color: #333;
         }
-        input[type="text"] {
+        input[type="text"],
+        select {
             width: calc(100% - 20px);
             padding: 10px;
             margin-bottom: 20px;
@@ -49,22 +50,40 @@
         button[type="submit"]:hover {
             background-color: #0056b3;
         }
-        a {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #007bff;
-            text-decoration: none;
-        }
     </style>
 </head>
 <body>
-    <h1>Delete Store Information</h1>
-    <form action="/delete_store" method="post">
-        <label for="store_code">Store Code:</label>
-        <input type="text" id="store_code" name="store_code" required>
-        <button type="submit">Delete Store</button>
+    <h1>Search Items</h1>
+    <form action="/search" method="POST">
+        <label for="item_name">Item Name:</label>
+        <input type="text" id="item_name" name="item_name">
+        <br>
+        <label for="store_code">Store:</label>
+        <select id="store_code" name="store_code">
+            {% for _, store_address in store_options %}
+            <option value="{{ loop.index }}">{{ store_address }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="in_stock">In Stock:</label>
+        <select id="in_stock" name="in_stock">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+        </select>
+        <br>
+        <label for="price_min">Price Min:</label>
+        <input type="text" id="price_min" name="price_min">
+        <br>
+        <label for="price_max">Price Max:</label>
+        <input type="text" id="price_max" name="price_max">
+        <br>
+        <label for="sort">Sort:</label>
+        <select id="sort" name="sort">
+            <option value="0">Descending</option>
+            <option value="1">Ascending</option>
+        </select>
+        <br>
+        <button type="submit">Search</button>
     </form>
-    <a href="/">Home</a>
 </body>
 </html>
