@@ -1,19 +1,19 @@
 # customer_interface.py
 
 from flask import Flask, render_template, request
-from customer_actions import get_shard, search_items
+from customer_actions import *
 
 app = Flask(__name__, template_folder="templates")
 
 # Mock function to get store options (replace with actual implementation)
-def get_store_options():
-    return [(1, 'Figueroa'), (2, 'Jefferson')]  # Example store options
 
+# Update index route to pass store_options containing store ID and address
 @app.route('/')
 def index():
-    store_options = get_store_options()
-    return render_template('user_interface.html', store_options=store_options)
+    store_results = get_store_options()
+    return render_template('user_interface.html', store_options=store_results)
 
+# Ensure that the selected store ID is passed back to the search function
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':

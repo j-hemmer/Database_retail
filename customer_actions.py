@@ -17,7 +17,7 @@
 
 
 import mysql.connector
-from config import shard_connections
+from config import shard_connections, central_db_params
 
 # Function to get the correct shard based on store_code
 def get_shard(store_code):
@@ -73,3 +73,30 @@ def search_items(item_name, store_code, in_stock, price_min=None, price_max=None
             cursor.close()
         if shard_connection:
             shard_connection.close()
+
+# Modify get_store_options function to fetch both store ID and address
+def get_store_options():
+    try:
+        connection = mysql.connector.connect(**central_db_params)
+        cursor = connection.cursor()
+
+        # Execute the query to select store codes and addresses
+        query = "SELECT store_code, address FROM stores"
+        cursor.execute(query)
+
+        # Fetch all rows
+        store_records = cursor.fetchall()
+
+        return store_records
+
+    except mysql.connector.Error as err:
+        # Handle any database errors
+        print(f"Error fetching store information: {err}")
+        return []
+
+    finally:
+        # Close cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()

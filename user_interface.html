@@ -60,8 +60,8 @@
         <br>
         <label for="store_code">Store:</label>
         <select id="store_code" name="store_code">
-            {% for store_id, store_name in store_options %}
-            <option value="{{ store_id }}">{{ store_name }}</option>
+            {% for _, store_address in store_options %}
+            <option value="{{ loop.index }}">{{ store_address }}</option>
             {% endfor %}
         </select>
         <br>
