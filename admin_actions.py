@@ -45,6 +45,12 @@
 import mysql.connector
 from config import shard_connections, central_db_params
 
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'dsci551'
+}
+
 # Function to get the correct shard based on store_code
 def get_shard(store_code):
     # Assuming number of shards is equal to the length of shard_connections
