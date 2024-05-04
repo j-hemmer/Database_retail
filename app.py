@@ -134,7 +134,7 @@ def insert_inventory():
         quantity = request.form['quantity']
         price = request.form['price']
         # Insert store information into the database
-        #insert_new_store(store_code, address, opening_time, closing_time, x_coord, y_coord)
+        stock_new_item(item_code, store_code, item_name, quantity, price)
         
 
         return render_template('index.html')
