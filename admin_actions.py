@@ -422,7 +422,7 @@ def view_items(store_code, item_code, item_name):
         finally:
             if shard_connection:
                 shard_cursor.close()
-def get_points_from_database():
+def get_points_from_database(connection):
     cursor = connection.cursor()
     cursor.execute("SELECT x, y, address, opening_time, closing_time, store_code FROM Stores")
     points = cursor.fetchall()
