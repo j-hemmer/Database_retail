@@ -76,11 +76,12 @@ def insert_new_store(store_code, address, opening_time, closing_time, x, y):
 
         try:
             # Insert the values into the database
-            if float(y) < 25 or float(y) > 85:
-                x = None
+
+            # needs to be [25, 85]
+            if float(y) not in range(25, 86):
                 y = None
-            if float(x) < -120 or float(x) > -70:
-                y = None
+            # needs to be [-120, -50]
+            if float(x) not in range(-120, -49):
                 x = None
             # Insert into shard database
             shard_cursor = shard_connection.cursor()
