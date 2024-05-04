@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search Items</h1>
+    <form action="/search" method="POST">
+        <label for="item_name">Item Name:</label>
+        <input type="text" id="item_name" name="item_name">
+        <br>
+        <label for="store_code">Store:</label>
+        <select id="store_code" name="store_code">
+            {% for store_id, store_name in store_options %}
+            <option value="{{ store_id }}">{{ store_name }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="in_stock">In Stock:</label>
+        <select id="in_stock" name="in_stock">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+        </select>
+        <br>
+        <label for="price_min">Price Min:</label>
+        <input type="text" id="price_min" name="price_min">
+        <br>
+        <label for="price_max">Price Max:</label>
+        <input type="text" id="price_max" name="price_max">
+        <br>
+        <label for="sort">Sort:</label>
+        <select id="sort" name="sort">
+            <option value="0">Descending</option>
+            <option value="1">Ascending</option>
+        </select>
+        <br>
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>
