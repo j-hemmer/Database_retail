@@ -180,6 +180,14 @@ def fetch_data():
 def home():
     return render_template('index.html')
 
+def get_shard(store_code):
+    # Assuming number of shards is equal to the length of shard_connections
+    # Store code needs to be an integer
+    # Num shards is 2 I believe
+    # just going to use 2
+    # num_shards = len(shard_connections)
+    return (int(store_code) % 2)+ 1
+    
 def insert_store():
     if request.method == 'POST':
         # Handle form submission here
