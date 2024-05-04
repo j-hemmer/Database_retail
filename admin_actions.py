@@ -62,7 +62,7 @@ def connect_to_database(connection_params):
         return None
 
 # Function to insert a new store
-def insert_store(store_code, address, opening_time, closing_time):
+def insert_new_store(store_code, address, opening_time, closing_time, x, y):
     shard_id = get_shard(store_code)
     shard_connection_params = shard_connections[shard_id]
     central_connection_params = central_db_params
@@ -71,35 +71,48 @@ def insert_store(store_code, address, opening_time, closing_time):
     central_connection = connect_to_database(central_connection_params)
 
     if shard_connection and central_connection:
+        shard_cursor = None
+        central_cursor = None  # Initialize the variables outside the try block
+
         try:
+            # Insert the values into the database
+            if float(y) < 25 or float(y) > 85:
+                x = None
+                y = None
+            if float(x) < -120 or float(x) > -70:
+                y = None
+                x = None
             # Insert into shard database
             shard_cursor = shard_connection.cursor()
             insert_store_query = """
-            INSERT INTO Stores (store_code, address, opening_time, closing_time)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO Stores (store_code, address, opening_time, closing_time, x, y)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """
-            shard_cursor.execute(insert_store_query, (store_code, address, opening_time, closing_time))
+            shard_cursor.execute(insert_store_query, (store_code, address, opening_time, closing_time, x, y))
             shard_connection.commit()
 
             # Insert into central database
             central_cursor = central_connection.cursor()
             insert_central_query = """
-            INSERT INTO Stores (store_code, address, opening_time, closing_time)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO Stores (store_code, address, opening_time, closing_time, x, y)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """
-            central_cursor.execute(insert_central_query, (store_code, address, opening_time, closing_time))
+            central_cursor.execute(insert_central_query, (store_code, address, opening_time, closing_time, x, y))
             central_connection.commit()
 
             print("Store inserted successfully.")
         except mysql.connector.Error as err:
             print(f"Error inserting store: {err}")
         finally:
-            if shard_connection:
+            if shard_cursor:
                 shard_cursor.close()
+            if central_cursor:
+                central_cursor.close()
+            if shard_connection:
                 shard_connection.close()
             if central_connection:
-                central_cursor.close()
                 central_connection.close()
+
 
 def get_stores():
     try:
@@ -131,7 +144,7 @@ def get_stores():
             connection.close()
 
 # Function to update existing store's hours
-def update_hours(store_code, opening_time, closing_time):
+def update_store_hours(store_code, opening_time, closing_time):
     shard_id = get_shard(store_code)
     shard_connection_params = shard_connections[shard_id]
     central_connection_params = central_db_params
@@ -172,7 +185,7 @@ def update_hours(store_code, opening_time, closing_time):
                 central_cursor.close()
                 central_connection.close()
 
-def delete_store(store_code):
+def remove_store(store_code):
     shard_id = get_shard(store_code)
     shard_connection_params = shard_connections[shard_id]
     central_connection_params = central_db_params
@@ -385,7 +398,51 @@ def view_items(store_code, item_code, item_name):
         finally:
             if shard_connection:
                 shard_cursor.close()
+def get_points_from_database():
+    shard_connection_params = central_db_params  # Assuming points are stored in the central database
+    connection = connect_to_database(shard_connection_params)
 
+    if connection:
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT x, y, address, opening_time, closing_time, store_code FROM Stores")
+            points = cursor.fetchall()
+            return points
+        except mysql.connector.Error as err:
+            print(f"Error fetching points from database: {err}")
+            return []
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
+    else:
+        return []
+
+def fetch_store_data(store_id):
+    shard_id = get_shard(store_id)
+    shard_connection_params = shard_connections[shard_id]
+
+    connection = connect_to_database(shard_connection_params)
+
+    if connection:
+        try:
+            cursor = connection.cursor()
+            sql = "SELECT * FROM Stores WHERE store_code = %s"
+            val = (store_id,)
+            cursor.execute(sql, val)
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(f"Error fetching store data: {err}")
+            return []
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
+    else:
+        return []
 
 
 

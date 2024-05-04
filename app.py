@@ -6,13 +6,7 @@ import mysql.connector
 from folium.plugins import HeatMap
 from shapely.geometry import Point
 from admin_actions import *
-from customer_actions import *
-
-db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'dsci551'
-}
+from config import *
 
 app = Flask(__name__)
 @app.route('/')
@@ -106,7 +100,7 @@ def delete_store():
         store_code = request.form['store_code']
         
         # Delete store information from the database
-        delete_store_info(store_code)
+        remove_store(store_code)
         
         return render_template('index.html')
     else:
@@ -123,7 +117,7 @@ def insert_store():
         x_coord = request.form['x']
         y_coord = request.form['y']
         # Insert store information into the database
-        insert_store_info(store_code, address, opening_time, closing_time, x_coord, y_coord)
+        insert_new_store(store_code, address, opening_time, closing_time, x_coord, y_coord)
         
 
         return render_template('index.html')
@@ -173,130 +167,8 @@ def fetch_data():
     else:
         return render_template('fetch_data.html')
 
-
-
-# BACKEND
-
 def home():
     return render_template('index.html')
-
-def get_shard(store_code):
-    # Assuming number of shards is equal to the length of shard_connections
-    # Store code needs to be an integer
-    # Num shards is 2 I believe
-    # just going to use 2
-    # num_shards = len(shard_connections)
-    return (int(store_code) % 2)+ 1
-    
-def insert_store():
-    if request.method == 'POST':
-        # Handle form submission here
-        pass
-    else:
-        return render_template('insert_store.html')
-    
-def get_points_from_database(connection):
-    # Query the database to get x and y coordinates of the points from out stores
-    cursor = connection.cursor()
-    cursor.execute("SELECT x, y, address, opening_time, closing_time, store_code FROM Stores")
-    points = cursor.fetchall()
-    cursor.close()
-    return points
-
-def connect_to_database(shard):
-    try:
-        # Modify this function based on the shard configuration
-        mydb = mysql.connector.connect(
-            host=db_config['host'],
-            user=db_config['user'],
-            password=db_config['password'],
-            database=f"shard{shard}_db"
-        )
-        return mydb
-    except mysql.connector.Error as err:
-        # Handle connection error
-        raise Exception(f"Error connecting to MySQL database: {err}")
-
-def insert_store_info(store_code, address, opening_time, closing_time, x, y):
-    # Get shard based on store code
-    shard = get_shard(store_code)
-
-    # Connect to the database depending on our shard and create cursor
-    mydb = connect_to_database(shard)
-    cursor = mydb.cursor()
-
-    # Insert the values into the database
-    if float(y) < 25 or float(y) > 85:
-        x = None
-        y = None
-    if float(x) < -120 or float(x) > -70:
-        y = None
-        x = None
-
-    sql = "INSERT INTO Stores (store_code, address, opening_time, closing_time, x, y) VALUES (%s, %s, %s, %s, %s, %s)"
-    val = (store_code, address, opening_time, closing_time, x, y)
-    cursor.execute(sql, val)
-    
-    # Commit and close everything
-    mydb.commit()
-    cursor.close()
-    mydb.close()
-
-def update_store_hours(store_id, opening_hours, closing_hours):
-    # Based on an existing store, you can update the stores opening and closing hours
-    # Reloads if the store does not exist
-    shard = get_shard(store_id)  
-    mydb = connect_to_database(shard)
-    cursor = mydb.cursor()
-    sql = "UPDATE Stores SET opening_time = %s, closing_time = %s WHERE store_code = %s"
-    val = (opening_hours, closing_hours, store_id) 
-    cursor.execute(sql, val)
-    if cursor.rowcount == 0:
-        # If no rows were affected, it means the store code doesn't exist
-        cursor.close()
-        mydb.close()
-        return False
-    else:
-        mydb.commit()
-        cursor.close()
-        mydb.close()
-        return True
-
-def fetch_store_data(store_id):
-    # Getting the store data from a certain store ID
-    # Reloads if the store ID does not exist
-    shard = get_shard(store_id) 
-    mydb = connect_to_database(shard)
-    cursor = mydb.cursor()
-    sql = "SELECT * FROM Stores WHERE store_code = %s"
-    val = (store_id,)
-    cursor.execute(sql, val)
-    result = cursor.fetchall()
-    cursor.close()
-    mydb.close()
-    return result
-
-def delete_store_info(store_code):
-    try:
-        # Get shard based on store code
-        shard = get_shard(store_code)
-
-        # Connect to the database depending on our shard and create cursor
-        mydb = connect_to_database(shard)
-        cursor = mydb.cursor()
-
-        # Delete the row from the database
-        sql = "DELETE FROM Stores WHERE store_code = %s"
-        val = (store_code,)
-        cursor.execute(sql, val)
-
-        # Commit and close everything
-        mydb.commit()
-        cursor.close()
-
-        return True, "Store information deleted successfully!"
-    except mysql.connector.Error as err:
-        return False, f"Error deleting store information from MySQL database: {err}"
 
 @app.route('/view_items', methods=['GET', 'POST'])
 def view_items_route():

@@ -22,6 +22,7 @@ from config import shard_connections
 # Function to get the correct shard based on store_code
 def get_shard(store_code):
     # Assuming number of shards is equal to the length of shard_connections
+    store_code = int(store_code)
     num_shards = len(shard_connections)
     return store_code % num_shards
 
