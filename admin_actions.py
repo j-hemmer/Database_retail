@@ -423,25 +423,30 @@ def view_items(store_code, item_code, item_name):
             if shard_connection:
                 shard_cursor.close()
 def get_points_from_database():
-    shard_connection_params = central_db_params  # Assuming points are stored in the central database
-    connection = connect_to_database(shard_connection_params)
+    cursor = connection.cursor()
+    cursor.execute("SELECT x, y, address, opening_time, closing_time, store_code FROM Stores")
+    points = cursor.fetchall()
+    cursor.close()
+    return points
+    # shard_connection_params = central_db_params  # Assuming points are stored in the central database
+    # connection = connect_to_database(shard_connection_params)
 
-    if connection:
-        try:
-            cursor = connection.cursor()
-            cursor.execute("SELECT x, y, address, opening_time, closing_time, store_code FROM Stores")
-            points = cursor.fetchall()
-            return points
-        except mysql.connector.Error as err:
-            print(f"Error fetching points from database: {err}")
-            return []
-        finally:
-            if cursor:
-                cursor.close()
-            if connection:
-                connection.close()
-    else:
-        return []
+    # if connection:
+    #     try:
+    #         cursor = connection.cursor()
+    #         cursor.execute("SELECT x, y, address, opening_time, closing_time, store_code FROM Stores")
+    #         points = cursor.fetchall()
+    #         return points
+    #     except mysql.connector.Error as err:
+    #         print(f"Error fetching points from database: {err}")
+    #         return []
+    #     finally:
+    #         if cursor:
+    #             cursor.close()
+    #         if connection:
+    #             connection.close()
+    # else:
+    #     return []
 
 def fetch_store_data(store_id):
     shard_id = get_shard(store_id)
