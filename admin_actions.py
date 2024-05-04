@@ -114,6 +114,19 @@ def insert_new_store(store_code, address, opening_time, closing_time, x, y):
             if central_connection:
                 central_connection.close()
 
+def connect_to_database(shard):
+    try:
+        # Modify this function based on the shard configuration
+        mydb = mysql.connector.connect(
+            host=db_config['host'],
+            user=db_config['user'],
+            password=db_config['password'],
+            database=f"shard{shard}_db"
+        )
+        return mydb
+    except mysql.connector.Error as err:
+        # Handle connection error
+        raise Exception(f"Error connecting to MySQL database: {err}")
 
 def get_stores():
     try:
