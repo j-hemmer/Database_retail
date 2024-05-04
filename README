@@ -19,16 +19,17 @@ Setting up the code:
 - There is also a folder with the shapfile that can be added to the show_map function in app.py
 
 Brief file descriptions:
-- app.py --> web based GUI to create, delete, update stores as well as view them in a map
+- app.py --> web based GUI to create, delete, update stores as well as view them in a map. can modify inventory as well. used by store admin
 - templates --> houses all of the html files. This includes for app.py as well as customer_interface.py
-- template --> houses the html files for only app.py, but just use templates because that is the name used for app.py code
-- GUI.py --> same thing as app.py except is not web based and has less functionality
 - tables_creation.txt --> details table schemas from script to create tables
 - central_creation.py --> creates the database "central_db" that contains the stores and their information
 - shard_creation.py --> creates the shard databases (currently only have two). creates Vendor, Customer_Portal, and Stores in each shard
 - config.py --> stores connection information
 - admin_actions --> this file contains the planned functions that admins (store operators) will use to interact with the data
 - customer_actions --> this file contains the planned functions that customers will use to interact with the data
-- admin_interface --> this file provides the gui through tkinter for the admin to interact with the database
 - customer_interface --> this file provides the interface through Flask for customers to interact with the database
-- main.py --> used to launch the interfaces
+
+Using the code:
+- after setting up the code, you can run the app.py file to create stores, add inventory to stores
+- customer_interface.py can be ran to query the inventory as a customer 
+- sharding takes place over store codes in both of these instances, but all store information (excluding inventory) also stored in central_db 
