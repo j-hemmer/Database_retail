@@ -176,8 +176,10 @@ def update_store_hours(store_code, opening_time, closing_time):
             central_connection.commit()
 
             print("Store hours updated successfully.")
+            return True  # Return True if the update is successful
         except mysql.connector.Error as err:
             print(f"Error updating store hours: {err}")
+            return False  # Return False if there's an error
         finally:
             if shard_connection:
                 shard_cursor.close()
@@ -185,6 +187,8 @@ def update_store_hours(store_code, opening_time, closing_time):
             if central_connection:
                 central_cursor.close()
                 central_connection.close()
+    else:
+        return False  # Return False if the connections couldn't be established
 
 def remove_store(store_code):
     shard_id = get_shard(store_code)
