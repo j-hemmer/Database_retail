@@ -48,6 +48,7 @@ from config import shard_connections, central_db_params
 # Function to get the correct shard based on store_code
 def get_shard(store_code):
     # Assuming number of shards is equal to the length of shard_connections
+    store_code = int(store_code)
     num_shards = len(shard_connections)
     return store_code % num_shards
 
@@ -100,31 +101,22 @@ def insert_store(store_code, address, opening_time, closing_time):
                 central_cursor.close()
                 central_connection.close()
 
-def get_stores(return_all_columns=False):
+def get_stores():
     try:
         connection = mysql.connector.connect(**central_db_params)
         cursor = connection.cursor()
 
-        # Determine the columns to select based on the function argument
-        if return_all_columns:
-            # Select all columns
-            columns = "*"
-        else:
-            # Select store code and address columns
-            columns = "store_code, address"
-
-        # Execute the query to select all stores or just the address
-        query = f"SELECT {columns} FROM stores"
+        # Execute the query to select store codes
+        query = "SELECT store_code FROM stores"
         cursor.execute(query)
 
         # Fetch all rows
         store_records = cursor.fetchall()
 
-        if return_all_columns:
-            return store_records  # Return all columns
-        else:
-            # Return store code and address pairs
-            return store_records
+        # Extract store codes from the fetched records
+        store_codes = [record[0] for record in store_records]
+
+        return store_codes
 
     except mysql.connector.Error as err:
         # Handle any database errors
@@ -137,7 +129,6 @@ def get_stores(return_all_columns=False):
             cursor.close()
         if connection:
             connection.close()
-
 
 # Function to update existing store's hours
 def update_hours(store_code, opening_time, closing_time):

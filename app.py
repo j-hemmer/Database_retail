@@ -5,6 +5,8 @@ from folium import plugins
 import mysql.connector
 from folium.plugins import HeatMap
 from shapely.geometry import Point
+from admin_actions import *
+from customer_actions import *
 
 db_config = {
     'host': 'localhost',
@@ -174,13 +176,6 @@ def fetch_data():
 
 
 # BACKEND
-def get_shard(store_code):
-    # Assuming number of shards is equal to the length of shard_connections
-    # Store code needs to be an integer
-    # Num shards is 2 I believe
-    # just going to use 2
-    # num_shards = len(shard_connections)
-    return (int(store_code) % 2)+ 1
 
 def home():
     return render_template('index.html')
@@ -273,7 +268,6 @@ def fetch_store_data(store_id):
     mydb.close()
     return result
 
-
 def delete_store_info(store_code):
     try:
         # Get shard based on store code
@@ -295,6 +289,62 @@ def delete_store_info(store_code):
         return True, "Store information deleted successfully!"
     except mysql.connector.Error as err:
         return False, f"Error deleting store information from MySQL database: {err}"
+
+@app.route('/view_items', methods=['GET', 'POST'])
+def view_items_route():
+    if request.method == 'GET':
+        store_ids = get_stores()
+        # Render the view_items page
+        return render_template('view_items.html', store_ids=store_ids)
+    elif request.method == 'POST':
+        # Perform item operations based on the selected action
+        action = request.form.get('action')
+        item_code = int(request.form.get('item_code'))
+        store_id = int(request.form.get('store_id'))
+
+        if action == 'stock_new':
+            try:
+                item_name = request.form.get('item_name')
+                quantity = int(request.form.get('quantity'))
+                price = float(request.form.get('price'))
+                stock_new_item(item_code, store_id, item_name, quantity, price)
+                message = 'New item stocked successfully'
+            except ValueError:
+                message = 'Invalid input format'
+        elif action == 'restock':
+            try:
+                quantity = int(request.form.get('quantity'))
+                restock_item(item_code, store_id, quantity)
+                message = 'Item restocked successfully'
+            except ValueError:
+                message = 'Invalid input format'
+        elif action == 'change_price':
+            try:
+                price = float(request.form.get('price'))
+                price_change(item_code, store_id, price)
+                message = 'Item price changed successfully'
+            except ValueError:
+                message = 'Invalid input format'
+        elif action == 'remove':
+            remove_item(item_code, store_id)
+            message = 'Item removed successfully'
+
+        # Fetch updated items list
+        items = view_items(store_id)
+        return render_template('view_items.html', items=items, message=message)
+
+@app.route('/filter_items', methods=['POST'])
+def filter_items():
+    # Retrieve form data
+    store_id = request.form.get('store_id')
+    item_code = request.form.get('itemCode')
+    item_name = request.form.get('itemName')
+
+    # Call the view_items function passing the retrieved data
+    items = view_items(store_id, item_code, item_name)
+
+    # Render the view_items template with the filtered items
+    return render_template('items_table.html', items=items)
 
 
 
