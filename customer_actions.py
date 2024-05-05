@@ -31,8 +31,12 @@ def search_items(item_name, store_code, in_stock, price_min=None, price_max=None
     shard_connection_params = shard_connections[shard_id]
 
     # Construct the WHERE clause based on the provided parameters
-    where_clause = "WHERE Customer_Portal.item_name = %s AND Customer_Portal.store_code = %s AND Customer_Portal.in_stock = %s"
-    where_params = [item_name, store_code, in_stock]
+    where_clause = "WHERE Customer_Portal.store_code = %s AND Customer_Portal.in_stock = %s"
+    where_params = [store_code, in_stock]
+
+    if item_name:
+        where_clause += " AND Customer_Portal.item_name = %s"
+        where_params.append(item_name)
 
     if price_min is not None:
         where_clause += " AND price >= %s"
@@ -73,6 +77,7 @@ def search_items(item_name, store_code, in_stock, price_min=None, price_max=None
             cursor.close()
         if shard_connection:
             shard_connection.close()
+
 
 # Modify get_store_options function to fetch both store ID and address
 def get_store_options():
