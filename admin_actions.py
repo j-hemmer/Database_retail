@@ -233,6 +233,7 @@ def remove_store(store_code):
 
 
 def stock_new_item(item_code, store_code, item_name, quantity, price):
+    store_code = int(store_code)
     shard_id = get_shard(store_code)
     shard_connection_params = shard_connections[shard_id]
 
