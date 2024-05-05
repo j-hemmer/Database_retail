@@ -233,8 +233,7 @@ def remove_store(store_code):
 
 
 def stock_new_item(item_code, store_code, item_name, quantity, price):
-    store_code = int(store_code)
-    shard_id = get_shard(store_code)
+    shard_id = get_shard(int(store_code))
     shard_connection_params = shard_connections[shard_id]
 
     shard_connection = connect_to_database(shard_connection_params)
@@ -249,12 +248,12 @@ def stock_new_item(item_code, store_code, item_name, quantity, price):
             shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, quantity, price))
             if quantity > 0:
                 insert_item_query = """
-                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %f, 1)
+                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %f, %d)
                 """
                 shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, price, True))
             else:
                 insert_item_query = """
-                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %f, 1)
+                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %f, %d)
                 """
                 shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, price, False))
             shard_connection.commit()
@@ -272,7 +271,7 @@ def restock_item(item_code, store_code, quantity):
     shard_connection_params = shard_connections[shard_id]
 
     shard_connection = connect_to_database(shard_connection_params)
-
+    store_code = int(store_code)
     if shard_connection:
         try:
             # Update quantity of existing goods in Vendor table
