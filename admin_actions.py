@@ -243,17 +243,17 @@ def stock_new_item(item_code, store_code, item_name, quantity, price):
             # insert new item into shard table
             shard_cursor = shard_connection.cursor()
             insert_item_query = """
-            INSERT INTO Vendor(item_code, store_code, item_name, quantity, price) VALUES(%s, %s, %s, %s, %s)
+            INSERT INTO Vendor(item_code, store_code, item_name, quantity, price) VALUES(%s, %s, %s, %i, %f)
             """
             shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, quantity, price))
             if quantity > 0:
                 insert_item_query = """
-                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %s, %s)
+                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %f, 1)
                 """
                 shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, price, True))
             else:
                 insert_item_query = """
-                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %s, %s)
+                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %f, 1)
                 """
                 shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, price, False))
             shard_connection.commit()
