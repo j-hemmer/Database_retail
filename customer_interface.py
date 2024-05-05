@@ -20,9 +20,10 @@ def search():
         item_name = request.form['item_name']
         store_code = int(request.form['store_code'])
         in_stock = int(request.form['in_stock'])
-        price_min = float(request.form['price_min']) if request.form['price_min'] else None
-        price_max = float(request.form['price_max']) if request.form['price_max'] else None
+        price_min = float(request.form['price_min']) if request.form['price_min'] != '' else None
+        price_max = float(request.form['price_max']) if request.form['price_max'] != '' else None
         sort = int(request.form['sort'])
+        print(item_name, store_code, in_stock, price_min, price_max, sort)
         results = search_items(item_name, store_code, in_stock, price_min, price_max, sort)
         return render_template('search_results.html', results=results)
     else:
