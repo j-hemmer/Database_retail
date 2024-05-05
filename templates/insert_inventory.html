@@ -59,7 +59,7 @@
 </head>
 <body>
     <h1>Insert Store Inventory</h1>
-    <form action="/insert_store" method="post">
+    <form action="/insert_inventory" method="post">
         <label for="store_code">Store Code:</label>
         <input type="text" id="store_code" name="store_code" required>
 
@@ -70,10 +70,10 @@
         <input type="text" id="item_code" name="item_code" required>
 
         <label for="quantity">Quantity:</label>
-        <input type="text" id="quantity" name="quantity" required>
+        <input type="number" id="quantity" name="quantity" required>
 
         <label for="price">Price:</label>
-        <input type="text" id="price" name="price" required>
+        <input type="number" step="any" id="price" name="price" required>
 
         <input type="submit" value="Insert Store Inventory">
     </form>
