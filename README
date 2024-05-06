@@ -1,3 +1,6 @@
+**NOTE: THIS REPOSITORY CONTINUES TO BE UPDATED SINCE WE INTEND TO PURPOSE IT FOR FUTURE PORTFOLIO USE, BUT IT HAS MET THE REQUIREMENTS AS SPECIFIED BY THE CLASS**
+
+
 These files compose the database creation, related functions for interacting with the database.
 Here's the general structure of the data:
 - there are stores, each with their own attributes
