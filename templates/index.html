@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySQL GUI</title>
+    <title>Retail Management GUI</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,17 +63,26 @@
 <body>
     <div class="container">
         <h1>Welcome to the Store Database Management GUI</h1>
+
+        <h2>Store Management Options</h2>
         <ul>
             <li><a href="/insert_store">Insert Store Information</a></li>
-            <li><a href="/insert_inventory">Insert Inventory</a></li>
             <li><a href="/update_hours">Update Store Hours</a></li>
             <li><a href="/fetch_data">Get Data from a Store</a></li>
             <li><a href="/map">Show Map</a></li>
-            <li><a href="/view_items">View Items</a></li> <!-- New option to view items -->
         </ul>
+
+        <h2>Inventory Management Options</h2>
+        <ul>
+            <li><a href="/view_items">View Inventory</a></li>
+            <li><a href="/insert_inventory">Insert Inventory</a></li>
+            <li><a href="/restock_item">Restock Inventory</a></li>
+            <li><a href="/price_change">Change Prices</a></li>
+            <li><a href="/remove_item">Delete Inventory</a></li>
+        </ul>
+
         <div class="button-group">
             <button class="button" onclick="window.location.href='/delete_store'">Delete Store Information</button>
-            <button class="button" onclick="window.location.href='/'">Home</button>
         </div>
     </div>
 </body>

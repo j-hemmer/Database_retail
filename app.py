@@ -61,7 +61,7 @@ def show_map():
         # Create a buffer of radius 1000 around the icon
         # Not including because radius is in pixels
         # folium.CircleMarker([point[1], point[0]], radius=1000, color='green', fill=True, fill_color='green', fill_opacity=0.2).add_to(map)
-    
+
     for point in points2:
         popup_string = "Store code:\t"
         popup_string += str(point[5])
@@ -72,7 +72,7 @@ def show_map():
         popup_string += "\nClosing Hours:\t"
         popup_string += str(point[4])
         folium.Marker(location=[point[1], point[0]],popup=popup_string, icon = folium.Icon(color='red')).add_to(map)
-    
+
     legend_html = '''
          <div style="position: fixed; 
                      bottom: 50px; left: 50px; width: 150px; height: 170px; 
@@ -84,8 +84,8 @@ def show_map():
           </div>
          '''
     map.get_root().html.add_child(folium.Element(legend_html))
-    
-    
+
+
     # Save the map to an HTML file
     map.save('templates/map.html')
 
@@ -98,10 +98,10 @@ def delete_store():
     if request.method == 'POST':
         # Get form data
         store_code = request.form['store_code']
-        
+
         # Delete store information from the database
         remove_store(store_code)
-        
+
         return render_template('index.html')
     else:
         return render_template('delete_store_page.html')
@@ -118,7 +118,7 @@ def insert_store():
         y_coord = request.form['y']
         # Insert store information into the database
         insert_new_store(store_code, address, opening_time, closing_time, x_coord, y_coord)
-        
+
 
         return render_template('index.html')
     else:
@@ -135,7 +135,7 @@ def insert_inventory():
         price = float(request.form['price'])
         # Insert store information into the database
         stock_new_item(item_code, store_code, item_name, quantity, price)
-        
+
 
         return render_template('index.html')
     else:
@@ -148,10 +148,10 @@ def update_hours():
         store_id = request.form['store_id']
         opening_hours = request.form['opening_hours']
         closing_hours = request.form['closing_hours']
-        
+
         # Update store hours in the database
         success = update_store_hours(store_id, opening_hours, closing_hours)
-        
+
         if success:
             # Redirect to index page
             return render_template('index.html')
@@ -193,42 +193,6 @@ def view_items_route():
         store_ids = get_stores()
         # Render the view_items page
         return render_template('view_items.html', store_ids=store_ids)
-    elif request.method == 'POST':
-        # Perform item operations based on the selected action
-        action = request.form.get('action')
-        item_code = int(request.form.get('item_code'))
-        store_id = int(request.form.get('store_id'))
-
-        if action == 'stock_new':
-            try:
-                item_name = request.form.get('item_name')
-                quantity = int(request.form.get('quantity'))
-                price = float(request.form.get('price'))
-                stock_new_item(item_code, store_id, item_name, quantity, price)
-                message = 'New item stocked successfully'
-            except ValueError:
-                message = 'Invalid input format'
-        elif action == 'restock':
-            try:
-                quantity = int(request.form.get('quantity'))
-                restock_item(item_code, store_id, quantity)
-                message = 'Item restocked successfully'
-            except ValueError:
-                message = 'Invalid input format'
-        elif action == 'change_price':
-            try:
-                price = float(request.form.get('price'))
-                price_change(item_code, store_id, price)
-                message = 'Item price changed successfully'
-            except ValueError:
-                message = 'Invalid input format'
-        elif action == 'remove':
-            remove_item(item_code, store_id)
-            message = 'Item removed successfully'
-
-        # Fetch updated items list
-        items = view_items(store_id)
-        return render_template('view_items.html', items=items, message=message)
 
 @app.route('/filter_items', methods=['POST'])
 def filter_items():
@@ -243,6 +207,37 @@ def filter_items():
     # Render the view_items template with the filtered items
     return render_template('items_table.html', items=items)
 
+@app.route('/restock_item', methods=['POST'])
+def restock_item_route():
+    item_code = request.form['item_code']
+    store_code = request.form['store_code']
+    quantity = request.form['quantity']
+
+    # Call the restock_item function with the provided parameters
+    restock_item(item_code, store_code, quantity)
+
+    return jsonify({'message': f'{item_code} quantity has been updated in store {store_code}'}), 200
+
+@app.route('/price_change', methods=['POST'])
+def price_change_route():
+    item_code = request.form['item_code']
+    store_code = request.form['store_code']
+    price = request.form['price']
+
+    # Call the price_change function with the provided parameters
+    price_change(item_code, store_code, price)
+
+    return jsonify({'message': f'{item_code} price has been updated in store {store_code}'}), 200
+
+@app.route('/remove_item', methods=['POST'])
+def remove_item_route():
+    item_code = request.form['item_code']
+    store_code = request.form['store_code']
+
+    # Call the price_change function with the provided parameters
+    remove_item(item_code, store_code)
+
+    return jsonify({'message': f'{item_code} has been removed from store {store_code}'}), 200
 
 
 # Define other routes similarly
