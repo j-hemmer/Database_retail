@@ -71,6 +71,8 @@ def create_databases_and_tables():
                         price DECIMAL(6, 2),
                         PRIMARY KEY(item_code, store_code),
                         FOREIGN KEY(store_code) REFERENCES Stores(store_code)
+                        ON UPDATE CASCADE
+                        ON DELETE CASCADE
                     )
                     """,
                     """
@@ -83,6 +85,8 @@ def create_databases_and_tables():
                         PRIMARY KEY(item_code, store_code),
                         FOREIGN KEY(store_code) REFERENCES Stores(store_code),
                         FOREIGN KEY(item_code) REFERENCES Vendor(item_code)
+                        ON UPDATE CASCADE
+                        ON DELETE CASCADE
                     )
                     """
                 ]
