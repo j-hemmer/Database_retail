@@ -131,8 +131,8 @@ def insert_inventory():
         store_code = request.form['store_code']
         item_name = request.form['item_name']
         item_code = request.form['item_code']
-        quantity = request.form['quantity']
-        price = request.form['price']
+        quantity = int(request.form['quantity'])
+        price = float(request.form['price'])
         # Insert store information into the database
         stock_new_item(item_code, store_code, item_name, quantity, price)
         
