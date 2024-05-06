@@ -54,6 +54,22 @@
             text-align: center;
             color: #333;
         }
+        .button-group {
+            text-align: center;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
@@ -62,6 +78,9 @@
         <label for="store_id">Store ID:</label>
         <input type="text" id="store_id" name="store_id" required><br><br>
         <input type="submit" value="Fetch Data">
+        <div class="button-group">
+            <button class="button" onclick="window.location.href='/'">Home</button>
+        </div>
     </form>
     <div id="result_label"></div>
 </body>
