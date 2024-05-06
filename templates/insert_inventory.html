@@ -55,6 +55,22 @@
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
+        .button-group {
+            text-align: center;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +92,9 @@
         <input type="number" step="any" id="price" name="price" required>
 
         <input type="submit" value="Insert Store Inventory">
+            <div class="button-group">
+                <button class="button" onclick="window.location.href='/'">Home</button>
+            </div>
     </form>
 </body>
 </html>
