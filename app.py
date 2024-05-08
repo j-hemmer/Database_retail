@@ -219,16 +219,19 @@ def restock_item_route():
     else:
         return render_template('restock_item.html')
 
-@app.route('/price_change', methods=['POST'])
+@app.route('/price_change', methods=['GET', 'POST'])
 def price_change_route():
-    item_code = request.form['item_code']
-    store_code = request.form['store_code']
-    price = request.form['price']
+    if request.method == 'POST':
+        item_code = request.form['item_code']
+        store_code = request.form['store_code']
+        price = request.form['price']
 
-    # Call the price_change function with the provided parameters
-    price_change(item_code, store_code, price)
+        # Call the price_change function with the provided parameters
+        price_change(item_code, store_code, price)
 
-    return jsonify({'message': f'{item_code} price has been updated in store {store_code}'}), 200
+        return render_template('price_change.html')
+    else:
+        return render_template('price_change.html')
 
 @app.route('/remove_item', methods=['POST'])
 def remove_item_route():
