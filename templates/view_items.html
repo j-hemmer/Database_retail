@@ -1,74 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item Management</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .button-group {
+            text-align: center;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Item Management</h1>
-        <hr>
-        <!-- Form for filtering items -->
-        <form id="itemForm" method="POST" action="{{ url_for('view_items_route') }}">
-            <input type="hidden" name="action" id="actionInput" value="">
+    <h1>View Store Inventory</h1>
+    <form action="/view_items" method="post">
+        <label for="store_code">Store Code:</label>
+        <input type="text" id="store_code" name="store_code" required>
 
-            <!-- Change store_id input field to a dropdown menu -->
-            <div class="mb-3">
-                <label for="storeId" class="form-label">Store ID:</label>
-                <select class="form-select" id="storeId" name="store_id">
-                    <!-- Populate dropdown menu with store IDs -->
-                    {% for store_id in store_ids %}
-                        <option value="{{ store_id }}">{{ store_id }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <label for="item_code">Item Code:</label>
+        <input type="text" id="item_code" name="item_code" required>
 
-            <div class="mb-3">
-                <label for="itemCode" class="form-label">Item Code:</label>
-                <input type="text" class="form-control" id="itemCode" name="itemCode">
-            </div>
-            <div class="mb-3">
-                <label for="itemName" class="form-label">Item Name:</label>
-                <input type="text" class="form-control" id="itemName" name="itemName">
-            </div>
+        <label for="item_name">Item Name:</label>
+        <input type="number" id="item_name" name="item_name" required>
 
-            <button type="submit" class="btn btn-primary">View Items</button>
-        </form>
-
-        <!-- Items table -->
-        <div class="mt-4" id="itemsTableBody"></div>
-    </div>
-
-    <!-- JavaScript libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JavaScript for AJAX operations -->
-    <script>
-        $(document).ready(function () {
-            // Function to handle form submission for filtering items
-            $("#itemForm").submit(function (event) {
-                // Prevent default form submission
-                event.preventDefault();
-                // Get form data
-                var formData = $(this).serialize();
-                // AJAX request to fetch filtered items
-                $.ajax({
-                    type: "POST",
-                    url: "/filter_items",
-                    data: formData,
-                    success: function (response) {
-                        // Replace table content with retrieved items
-                        $("#itemsTableBody").html(response);
-                    },
-                    error: function () {
-                        alert("Error fetching items.");
-                    }
-                });
-            });
-        });
-    </script>
+        <input type="submit" value="Insert Store Inventory">
+        <div class="button-group">
+            <button class="button" onclick="window.location.href='/'">Home</button>
+        </div>
 </body>
 </html>
