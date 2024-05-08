@@ -207,16 +207,17 @@ def filter_items():
     # Render the view_items template with the filtered items
     return render_template('items_table.html', items=items)
 
-@app.route('/restock_item', methods=['POST'])
 def restock_item_route():
-    item_code = request.form['item_code']
-    store_code = request.form['store_code']
-    quantity = request.form['quantity']
+    if request.method == 'POST':
+        item_code = request.form['item_code']
+        store_code = request.form['store_code']
+        quantity = int(request.form['quantity'])
 
     # Call the restock_item function with the provided parameters
-    restock_item(item_code, store_code, quantity)
-
-    return jsonify({'message': f'{item_code} quantity has been updated in store {store_code}'}), 200
+        restock_item(item_code, store_code, quantity)
+        return render_template('restock_item.html')
+    else:
+        return render_template('restock_item.html')
 
 @app.route('/price_change', methods=['POST'])
 def price_change_route():
