@@ -233,32 +233,25 @@ def remove_store(store_code):
 
 
 def stock_new_item(item_code, store_code, item_name, quantity, price):
-    shard_id = get_shard(int(store_code))
+    shard_id = get_shard(store_code)
     shard_connection_params = shard_connections[shard_id]
 
     shard_connection = connect_to_database(shard_connection_params)
-
     if shard_connection:
         try:
             # insert new item into shard table
-            shard_cursor = shard_connection.cursor()
-            insert_item_query = """
-            INSERT INTO Vendor(item_code, store_code, item_name, quantity, price) VALUES(%s, %s, %s, %i, %f)
-            """
-            shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, quantity, price))
             if quantity > 0:
+                shard_cursor = shard_connection.cursor()
                 insert_item_query = """
-                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %f, %d)
+                INSERT INTO Vendor(item_code, store_code, item_name, quantity, price) VALUES(%s, %s, %s, %s, %s)
+                """
+                shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, quantity, price))
+                insert_item_query = """
+                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %s, %s)
                 """
                 shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, price, True))
-            else:
-                insert_item_query = """
-                INSERT INTO Customer_Portal(item_code, store_code, item_name, price, in_stock) VALUES(%s, %s, %s, %f, %d)
-                """
-                shard_cursor.execute(insert_item_query, (item_code, store_code, item_name, price, False))
-            shard_connection.commit()
-
-            print(f"{item_name} has been added to store {store_code}")
+                shard_connection.commit()
+                print(f"{item_name} has been added to store {store_code}")
         except mysql.connector.Error as err:
             print(f"Error inserting item: {err}")
         finally:
