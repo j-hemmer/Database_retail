@@ -443,5 +443,38 @@ def fetch_store_data(store_id):
     else:
         return []
 
+def get_all_stores():
+    credentials_0 = shard_connections[0]
+    credentials_1 = shard_connections[1]
+
+    connection_0 = mysql.connector.connect(**credentials_0)
+    connection_1 = mysql.connector.connect(**credentials_1)
+
+    query = "SELECT store_code from Stores"
+
+    cursor_0 = connection_0.cursor()
+    cursor_0.execute(query)
+    stores_0 = cursor_0.fetchall()
+    stores_0_codes = [i[0] for i in stores_0]
+
+
+    cursor_1 = connection_1.cursor()
+    cursor_1.execute(query)
+    stores_1 = cursor_1.fetchall()
+    stores_1_codes = [i[0] for i in stores_1]
+
+    stores_list = stores_0_codes + stores_1_codes
+    return stores_list
+
+    if cursor_0:
+        cursor_0.close()
+
+    if cursor_1:
+        cursor_1.close()
+
+    if connection_0:
+        connection_0.close()
+    if connection_1:
+        connection_1.close()
 
 
