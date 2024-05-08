@@ -127,17 +127,22 @@ def insert_store():
 @app.route('/insert_inventory', methods=['GET', 'POST'])
 def insert_inventory():
     if request.method == 'POST':
-        # Get form data
+        # Get form data 
+        item_code = request.form['item_code']
         store_code = request.form['store_code']
         item_name = request.form['item_name']
-        item_code = request.form['item_code']
         quantity = int(request.form['quantity'])
         price = float(request.form['price'])
         # Insert store information into the database
-        stock_new_item(item_code, store_code, item_name, quantity, price)
+        print(type(request.form['item_code']))
+        print(type(request.form['store_code']))
+        print(type(request.form['item_name']))
+        print(type(request.form['quantity']))
+        print(type(request.form['price']))
+        stock_new_item(request.form['item_code'], request.form['store_code'], request.form['item_name'], int(request.form['quantity']), float(request.form['price']))
 
 
-        return render_template('index.html')
+        return render_template('insert_inventory.html')
     else:
         return render_template('insert_inventory.html')
 
@@ -189,10 +194,22 @@ def home():
 
 @app.route('/view_items', methods=['GET', 'POST'])
 def view_items_route():
-    if request.method == 'GET':
-        store_ids = get_stores()
+    store_codes = get_all_stores()
+    print(store_codes)
+    if request.method == 'POST':
         # Render the view_items page
-        return render_template('view_items.html', store_ids=store_ids)
+        store_code = request.form['store_code']
+        shard_data = get_shard(store_code)
+        shard_creds = shard_connections[shard_data]
+        connection_via_shard = mysql.connector.connect(**shard_creds)
+        connection_cursor = connection_via_shard.cursor()
+        mini_query = "SELECT item_name, item_code, store_code, quantity FROM Vendor"
+        connection_cursor.execute(mini_query)
+        data = connection_cursor.fetchall()
+        output = [[i[0], i[1], i[2], i[3]] for i in data]
+        return render_template('view_items.html', store_codes=store_codes, data = output)
+    else:
+        return render_template('view_items.html', store_codes=store_codes)
 
 @app.route('/filter_items', methods=['GET', 'POST'])
 def filter_items():
@@ -219,6 +236,9 @@ def restock_item_route():
         return render_template('restock_item.html')
     else:
         return render_template('restock_item.html')
+
+
+
 
 @app.route('/price_change', methods=['GET', 'POST'])
 def price_change_route():
