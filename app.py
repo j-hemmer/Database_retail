@@ -194,7 +194,7 @@ def view_items_route():
         # Render the view_items page
         return render_template('view_items.html', store_ids=store_ids)
 
-@app.route('/filter_items', methods=['POST'])
+@app.route('/filter_items', methods=['GET', 'POST'])
 def filter_items():
     # Retrieve form data
     store_id = request.form.get('store_id')
@@ -207,6 +207,7 @@ def filter_items():
     # Render the view_items template with the filtered items
     return render_template('items_table.html', items=items)
 
+@app.route('/restock_item', methods=['GET', 'POST'])
 def restock_item_route():
     if request.method == 'POST':
         item_code = request.form['item_code']
@@ -233,15 +234,18 @@ def price_change_route():
     else:
         return render_template('price_change.html')
 
-@app.route('/remove_item', methods=['POST'])
+@app.route('/remove_item', methods=['GET' , 'POST'])
 def remove_item_route():
-    item_code = request.form['item_code']
-    store_code = request.form['store_code']
+    if request.method == 'POST':
+        item_code = request.form['item_code']
+        store_code = request.form['store_code']
 
-    # Call the price_change function with the provided parameters
-    remove_item(item_code, store_code)
+        # Call the price_change function with the provided parameters
+        remove_item(item_code, store_code)
 
-    return jsonify({'message': f'{item_code} has been removed from store {store_code}'}), 200
+        return render_template('remove_item.html')
+    else:
+        return render_template('remove_item.html')
 
 
 # Define other routes similarly
